@@ -29,8 +29,8 @@ namespace LearnHub.Back.Tests.Application.Handlers.Course
                 cfg.CreateMap<CreateCourseCommand, Domain.Course>();
                 cfg.CreateMap<UpdateCourseCommand, Domain.Course>();
                 cfg.CreateMap<Domain.Course, CourseDto>();
-                cfg.CreateMap<Domain.Enrollment, EnrollmentDto>();
-                cfg.CreateMap<Domain.Student, StudentDto>();
+                cfg.AddProfile<LearnHub.Back.Application.Mappings.EnrollmentProfile>();
+                cfg.AddProfile<LearnHub.Back.Application.Mappings.StudentProfile>();
             });
             
             _mapper = config.CreateMapper();
@@ -219,27 +219,49 @@ namespace LearnHub.Back.Tests.Application.Handlers.Course
             await _context.SaveChangesAsync();
 
             // Add enrollments - course2 has 3, course1 has 2, course3 has 1
-            var student = new Domain.Student 
+            var student1 = new Domain.Student 
             { 
                 Id = Guid.NewGuid(), 
-                FullName = "Test Student", 
-                Email = "student@test.com",
+                FullName = "Test Student 1", 
+                Email = "student1@test.com",
                 PhoneNumber = "123456789",
                 PostalAddress = "Test Address",
                 EducationLevel = "Bachelor",
                 CurrentOccupation = "Student",
                 PreviousExperience = "None"
             };
-            _context.Students.Add(student);
+            var student2 = new Domain.Student 
+            { 
+                Id = Guid.NewGuid(), 
+                FullName = "Test Student 2", 
+                Email = "student2@test.com",
+                PhoneNumber = "123456789",
+                PostalAddress = "Test Address",
+                EducationLevel = "Bachelor",
+                CurrentOccupation = "Student",
+                PreviousExperience = "None"
+            };
+            var student3 = new Domain.Student 
+            { 
+                Id = Guid.NewGuid(), 
+                FullName = "Test Student 3", 
+                Email = "student3@test.com",
+                PhoneNumber = "123456789",
+                PostalAddress = "Test Address",
+                EducationLevel = "Bachelor",
+                CurrentOccupation = "Student",
+                PreviousExperience = "None"
+            };
+            _context.Students.AddRange(student1, student2, student3);
             await _context.SaveChangesAsync();
 
             _context.Enrollments.AddRange(
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
-                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course3.Id, StudentId = student.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow }
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student1.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student2.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student3.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student1.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student2.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course3.Id, StudentId = student1.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow }
             );
             await _context.SaveChangesAsync();
 

@@ -189,4 +189,40 @@ public class CourseControllerTests
         okResult!.Value.Should().BeEquivalentTo(courses);
         mediatorMock.Verify(x => x.Send(It.Is<GetMostDemandedCoursesQuery>(q => q.Limit == customLimit), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithZeroLimit_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(0);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithNegativeLimit_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(-1);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithLimitOver100_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(101);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
 }
