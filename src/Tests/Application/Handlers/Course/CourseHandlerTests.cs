@@ -32,7 +32,6 @@ namespace LearnHub.Back.Tests.Application.Handlers.Course
                 cfg.CreateMap<Domain.Enrollment, EnrollmentDto>()
                     .ForMember(dest => dest.Student, opt => opt.Ignore())
                     .ForMember(dest => dest.Course, opt => opt.Ignore());
-                cfg.CreateMap<Domain.Student, StudentDto>();
             });
             
             _mapper = config.CreateMapper();
