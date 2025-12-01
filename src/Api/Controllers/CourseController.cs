@@ -38,6 +38,23 @@ namespace LearnHub.Back.Api.Controllers
         }
 
         /// <summary>
+        /// Gets courses with the least demand (fewest enrollments)
+        /// </summary>
+        /// <param name="count">Number of courses to return (default: 10)</param>
+        /// <returns>List of courses ordered by enrollment count ascending</returns>
+        /// <response code="200">Returns the list of courses with least demand</response>
+        [HttpGet("least-demand")]
+        [SwaggerOperation(
+            Summary = "Gets courses with least demand",
+            Description = "Retrieves courses ordered by the number of enrollments (ascending), showing courses with the fewest enrollments first")]
+        [ProducesResponseType(typeof(List<CourseDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<CourseDto>>> GetCoursesWithLeastDemand([FromQuery] int count = 10)
+        {
+            var result = await _mediator.Send(new GetCoursesWithLeastDemandQuery { Count = count });
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Gets a specific course by its ID
         /// </summary>
         /// <param name="id">Course ID</param>
