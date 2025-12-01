@@ -1,0 +1,33 @@
+using AutoMapper;
+using LearnHub.Back.Infrastructure;
+using MediatR;
+
+namespace LearnHub.Back.Application.Handlers.Course
+{
+    public class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseCommand, Unit>
+    {
+        private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;
+
+        public UpdateCourseCommandHandler(IMapper mapper, ApplicationDbContext context)
+        {
+            _mapper = mapper;
+            _context = context;
+        }
+
+        public async Task<Unit> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
+        {
+            //var course = await _context.Courses.FindAsync(new object[] { request.Id }, cancellationToken);
+            //_mapper.Map(request, course);
+            //await _context.SaveChangesAsync(cancellationToken);
+
+            // Simulando la actualización de un curso
+            // En un escenario real, aquí se validaría la existencia del curso
+            if (request.Id == Guid.Empty)
+                throw new KeyNotFoundException("Course not found");
+
+            // Simulando una actualización exitosa
+            return Unit.Value;
+        }
+    }
+}
