@@ -147,4 +147,44 @@ public class CourseControllerTests
         // Assert
         result.Should().BeOfType<NoContentResult>();
     }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetCoursesWithLeastDemand_ShouldReturnOkWithCourses(
+        List<CourseDto> courses,
+        [Frozen] Mock<IMediator> mediatorMock,
+        CourseController sut)
+    {
+        // Arrange
+        mediatorMock.Setup(x => x.Send(It.IsAny<GetCoursesWithLeastDemandQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(courses);
+
+        // Act
+        var result = await sut.GetCoursesWithLeastDemand(10);
+
+        // Assert
+        result.Result.Should().BeOfType<OkObjectResult>();
+        var okResult = result.Result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(courses);
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetCoursesWithLeastDemand_WithCustomCount_ShouldPassCountToQuery(
+        List<CourseDto> courses,
+        [Frozen] Mock<IMediator> mediatorMock,
+        CourseController sut)
+    {
+        // Arrange
+        int expectedCount = 5;
+        mediatorMock.Setup(x => x.Send(It.Is<GetCoursesWithLeastDemandQuery>(q => q.Count == expectedCount), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(courses);
+
+        // Act
+        var result = await sut.GetCoursesWithLeastDemand(expectedCount);
+
+        // Assert
+        result.Result.Should().BeOfType<OkObjectResult>();
+        mediatorMock.Verify(x => x.Send(It.Is<GetCoursesWithLeastDemandQuery>(q => q.Count == expectedCount), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
