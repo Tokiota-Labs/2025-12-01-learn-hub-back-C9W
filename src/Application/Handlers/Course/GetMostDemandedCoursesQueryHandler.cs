@@ -22,7 +22,7 @@ namespace LearnHub.Back.Application.Handlers.Course
             var courses = await _context.Courses
                 .Include(c => c.Instructor)
                 .Include(c => c.Enrollments)
-                .OrderByDescending(c => c.Enrollments.Count)
+                .OrderByDescending(c => c.Enrollments.Count(e => e.Status == "Approved"))
                 .Take(request.Limit)
                 .ToListAsync(cancellationToken);
 

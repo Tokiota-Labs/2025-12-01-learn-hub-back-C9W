@@ -320,6 +320,110 @@ namespace LearnHub.Back.Tests.Application.Handlers.Course
             result.Should().HaveCount(3);
         }
 
+        [Test]
+        public async Task GetMostDemandedCourses_ShouldOnlyCountApprovedEnrollments()
+        {
+            // Arrange
+            var instructor = new Domain.Instructor { Id = Guid.NewGuid(), Name = "Test Instructor", Biography = "Test Bio" };
+            _context.Instructors.Add(instructor);
+
+            var course1 = new Domain.Course
+            {
+                Id = Guid.NewGuid(),
+                Title = "Course 1",
+                Description = "Description 1",
+                Price = 100m,
+                Duration = 5,
+                InstructorId = instructor.Id,
+                Prerequisites = "None",
+                Modality = "Online",
+                IncludedMaterials = "None",
+                Certification = "Certificate",
+                Location = "Online",
+                Category = "Tech"
+            };
+
+            var course2 = new Domain.Course
+            {
+                Id = Guid.NewGuid(),
+                Title = "Course 2",
+                Description = "Description 2",
+                Price = 150m,
+                Duration = 7,
+                InstructorId = instructor.Id,
+                Prerequisites = "None",
+                Modality = "Online",
+                IncludedMaterials = "None",
+                Certification = "Certificate",
+                Location = "Online",
+                Category = "Tech"
+            };
+
+            _context.Courses.AddRange(course1, course2);
+            await _context.SaveChangesAsync();
+
+            // Create students
+            var student1 = new Domain.Student 
+            { 
+                Id = Guid.NewGuid(), 
+                FullName = "Test Student 1", 
+                Email = "student1@test.com",
+                PhoneNumber = "123456789",
+                PostalAddress = "Test Address",
+                EducationLevel = "Bachelor",
+                CurrentOccupation = "Student",
+                PreviousExperience = "None"
+            };
+            var student2 = new Domain.Student 
+            { 
+                Id = Guid.NewGuid(), 
+                FullName = "Test Student 2", 
+                Email = "student2@test.com",
+                PhoneNumber = "123456789",
+                PostalAddress = "Test Address",
+                EducationLevel = "Bachelor",
+                CurrentOccupation = "Student",
+                PreviousExperience = "None"
+            };
+            var student3 = new Domain.Student 
+            { 
+                Id = Guid.NewGuid(), 
+                FullName = "Test Student 3", 
+                Email = "student3@test.com",
+                PhoneNumber = "123456789",
+                PostalAddress = "Test Address",
+                EducationLevel = "Bachelor",
+                CurrentOccupation = "Student",
+                PreviousExperience = "None"
+            };
+            _context.Students.AddRange(student1, student2, student3);
+            await _context.SaveChangesAsync();
+
+            // Course 1 has 3 total enrollments but only 1 Approved
+            // Course 2 has 2 total enrollments but 2 Approved
+            // So Course 2 should rank higher
+            _context.Enrollments.AddRange(
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student1.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student2.Id, Status = "Pending", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course1.Id, StudentId = student3.Id, Status = "Rejected", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student1.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow },
+                new Domain.Enrollment { Id = Guid.NewGuid(), CourseId = course2.Id, StudentId = student2.Id, Status = "Approved", SchedulePreference = "Morning", EnrollmentDate = DateTime.UtcNow }
+            );
+            await _context.SaveChangesAsync();
+
+            var query = new GetMostDemandedCoursesQuery { Limit = 10 };
+            var handler = new GetMostDemandedCoursesQueryHandler(_context, _mapper);
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().HaveCount(2);
+            result[0].Title.Should().Be("Course 2"); // 2 approved enrollments
+            result[1].Title.Should().Be("Course 1"); // 1 approved enrollment
+        }
+
         [TearDown]
         public void TearDown()
         {

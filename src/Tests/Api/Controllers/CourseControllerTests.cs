@@ -216,11 +216,11 @@ public class CourseControllerTests
 
     [Test]
     [AutoMoqData]
-    public async Task GetMostDemanded_WithLimitOver100_ShouldReturnBadRequest(
+    public async Task GetMostDemanded_WithLimitOver200_ShouldReturnBadRequest(
         CourseController sut)
     {
         // Act
-        var result = await sut.GetMostDemanded(101);
+        var result = await sut.GetMostDemanded(201);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
