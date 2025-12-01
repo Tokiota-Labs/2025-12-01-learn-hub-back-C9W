@@ -147,4 +147,82 @@ public class CourseControllerTests
         // Assert
         result.Should().BeOfType<NoContentResult>();
     }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_ShouldReturnOkWithCourses(
+        List<CourseDto> courses,
+        [Frozen] Mock<IMediator> mediatorMock,
+        CourseController sut)
+    {
+        // Arrange
+        mediatorMock.Setup(x => x.Send(It.IsAny<GetMostDemandedCoursesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(courses);
+
+        // Act
+        var result = await sut.GetMostDemanded(10);
+
+        // Assert
+        result.Result.Should().BeOfType<OkObjectResult>();
+        var okResult = result.Result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(courses);
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithCustomLimit_ShouldPassLimitToQuery(
+        List<CourseDto> courses,
+        [Frozen] Mock<IMediator> mediatorMock,
+        CourseController sut)
+    {
+        // Arrange
+        int customLimit = 5;
+        mediatorMock.Setup(x => x.Send(It.Is<GetMostDemandedCoursesQuery>(q => q.Limit == customLimit), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(courses);
+
+        // Act
+        var result = await sut.GetMostDemanded(customLimit);
+
+        // Assert
+        result.Result.Should().BeOfType<OkObjectResult>();
+        var okResult = result.Result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(courses);
+        mediatorMock.Verify(x => x.Send(It.Is<GetMostDemandedCoursesQuery>(q => q.Limit == customLimit), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithZeroLimit_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(0);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithNegativeLimit_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(-1);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Test]
+    [AutoMoqData]
+    public async Task GetMostDemanded_WithLimitOver200_ShouldReturnBadRequest(
+        CourseController sut)
+    {
+        // Act
+        var result = await sut.GetMostDemanded(201);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
 }
